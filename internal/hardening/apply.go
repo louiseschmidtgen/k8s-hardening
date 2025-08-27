@@ -25,17 +25,17 @@ func ApplyFix(baseline, tailoringFile, nodeRole string) error {
 		return err
 	}
 
-	// 3. Install usg and apply disa_stig if requested
+	// 2. Install usg and apply disa_stig if requested
 	if config.USG.Apply != nil && *config.USG.Apply {
 		if err := installUSG(); err != nil {
 			return err
 		}
-		if err := applyUSGProfile(baseline); err != nil {
+		if err := applyUSGProfile(); err != nil {
 			return err
 		}
 	}
 
-	// 2. Create UFW rules (firewall)
+	// 3. Create UFW rules (firewall)
 	if config.UFW.Apply != nil && *config.UFW.Apply {
 		if err := createUFWRules(); err != nil {
 			return err
@@ -85,10 +85,10 @@ func installUSG() error {
 	return nil
 }
 
-func applyUSGProfile(profile string) error {
-	fmt.Printf("Applying USG profile: %s...\n", profile)
+func applyUSGProfile() error {
+	fmt.Printf("Applying USG profile: disa_stig...")
 
-	fixCmd := exec.Command("sudo", "usg", "fix", profile)
+	fixCmd := exec.Command("sudo", "usg", "fix", "disa_stig")
 	out, err := fixCmd.CombinedOutput()
 	if err != nil {
 		return fmt.Errorf("Error applying USG profile: %v\nOutput: %s", err, out)
