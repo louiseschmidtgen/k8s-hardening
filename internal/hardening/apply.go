@@ -160,7 +160,7 @@ func ensureSystemTuningConfigFile(systemParameters map[string]*string) error {
 		return fmt.Errorf("failed to check for highest order system tuning file: %w", err)
 	}
 
-	newFile := filepath.Join("/etc/sysctl.d", fmt.Sprintf("%d-k8s.conf", maxOrder+1))
+	newFile := filepath.Join("/etc/sysctl.d", fmt.Sprintf("%d-k8s-stig.conf", maxOrder+1))
 	data := []byte(systemConfFileHeader)
 	for param, value := range systemParameters {
 		if value != nil {

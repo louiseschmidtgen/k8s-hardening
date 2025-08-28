@@ -18,6 +18,11 @@ func Pointer[T any](v T) *T {
 // and then renamed to the target file to avoid partial writes in case of a crash.
 func WriteFile(name string, data []byte, perm fs.FileMode) error {
 	dir := filepath.Dir(name)
+
+	if err := os.MkdirAll(dir, 0o755); err != nil {
+		return fmt.Errorf("failed to create directory: %w", err)
+	}
+
 	tmpFile, err := os.CreateTemp(dir, "tmp-*")
 	if err != nil {
 		return fmt.Errorf("failed to create temp file: %w", err)
