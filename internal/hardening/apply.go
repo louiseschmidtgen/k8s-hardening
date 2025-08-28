@@ -89,9 +89,8 @@ func applyUSGProfile() error {
 	fmt.Printf("Applying USG profile: disa_stig...")
 
 	fixCmd := exec.Command("sudo", "usg", "fix", "disa_stig")
-	out, err := fixCmd.CombinedOutput()
-	if err != nil {
-		return fmt.Errorf("Error applying USG profile: %v\nOutput: %s", err, out)
+	if err := fixCmd.Run(); err != nil {
+		return fmt.Errorf("Error applying USG profile: %v", err)
 	}
 	return nil
 }

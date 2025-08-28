@@ -16,5 +16,4 @@ func Execute() {
 
 func init() {
 	rootCmd.AddCommand(fixCmd)
-	rootCmd.AddCommand(auditCmd)
 }

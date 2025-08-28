@@ -6,7 +6,6 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
-	"sort"
 )
 
 func Pointer[T any](v T) *T {
@@ -70,29 +69,4 @@ func GetFileMatches(path string, re *regexp.Regexp) ([]string, error) {
 		matches = append(matches, match)
 	}
 	return matches, nil
-}
-
-// Serializes a map of service arguments in the format "argument=value" to file.
-func SerializeArgumentFile(arguments map[string]string, path string, headerComment string) error {
-	file, err := os.Create(path)
-	if err != nil {
-		return fmt.Errorf("failed to write argument file %s: %w", path, err)
-	}
-	defer file.Close()
-
-	if headerComment != "" {
-		file.WriteString(headerComment)
-	}
-
-	// Order the argument keys alphabetically to make the output deterministic
-	keys := make([]string, 0)
-	for k := range arguments {
-		keys = append(keys, k)
-	}
-	sort.Strings(keys)
-	for _, k := range keys {
-		file.WriteString(fmt.Sprintf("%s=%s\n", k, arguments[k]))
-	}
-
-	return nil
 }
