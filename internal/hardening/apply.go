@@ -34,7 +34,7 @@ func ApplyFix(baseline, tailoringFile, nodeRole string) error {
 
 	// 3. Create UFW rules (firewall)
 	if config.UFW.Apply != nil && *config.UFW.Apply {
-		if err := createUFWRules(); err != nil {
+		if err := createUFWRules(nodeRole); err != nil {
 			return err
 		}
 	}
@@ -80,45 +80,40 @@ func applyUSGProfile() error {
 
 func removeSSHD() error {
 	fmt.Println("Removing SSHD (OpenSSH Server) if present...")
-	removeCmd := exec.Command("sudo", "apt-get", "remove", "-y", "openssh-server")
-	if err := removeCmd.Run(); err != nil {
+	scriptPath := "internal/disa-stig/04-remove-sshd.sh"
+	cmd := exec.Command("sudo", "bash", scriptPath)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	if err := cmd.Run(); err != nil {
 		return fmt.Errorf("Error removing OpenSSH Server: %v", err)
 	}
 	return nil
 }
 
 func writeAuditPolicy(path, name *string) error {
+	fmt.Println("Writing audit-policy.yaml for kube-apiserver...")
 	if path == nil || name == nil {
 		return fmt.Errorf("Invalid audit policy path or name")
 	}
-
-	auditPolicyPath := filepath.Join(*path, *name)
-	auditPolicy := `
-# Log all requests at the Metadata level.
-apiVersion: audit.k8s.io/v1
-kind: Policy
-rules:
-  - level: Metadata
-`
-
-	if err := utils.WriteFile(auditPolicyPath, []byte(auditPolicy), os.FileMode(0o644)); err != nil {
+	scriptPath := "internal/disa-stig/05-audit-policy.sh"
+	cmd := exec.Command("sudo", "bash", scriptPath, *path, *name)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	if err := cmd.Run(); err != nil {
 		return fmt.Errorf("Error writing audit policy: %v", err)
 	}
 	return nil
 }
 
-func createUFWRules() error {
+func createUFWRules(nodeRole string) error {
 	fmt.Println("Creating UFW (Uncomplicated Firewall) rules...")
 
-	// 3. Allow Kubernetes service ports
-	// TODO: make configurable
-	ports := []string{
-		"6443/tcp", "10250/tcp", "10257/tcp", "10259/tcp", "2379/tcp", "2380/tcp", "6400/tcp", "4240/tcp", "8472/udp",
-	}
-	for _, port := range ports {
-		if err := exec.Command("sudo", "ufw", "allow", port).Run(); err != nil {
-			return fmt.Errorf("failed to allow port %s: %w", port, err)
-		}
+	scriptPath := fmt.Sprintf("internal/disa-stig/03-ufw-%s.sh", nodeRole)
+	cmd := exec.Command("sudo", "bash", scriptPath)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("Error creating UFW rules: %v", err)
 	}
 
 	fmt.Println("UFW rules applied for Canonical Kubernetes.")

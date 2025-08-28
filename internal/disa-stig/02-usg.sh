@@ -3,12 +3,14 @@ set -euo pipefail
 
 # Install usg tool
 sudo apt update
+sudo apt upgrade -y 
 sudo apt install -y usg
 
 # Generate a DISA STIG compliance audit report
 # usg audit disa_stig
 
 # Automatically apply recommended hardening changes
+sudo pro enable usg
 sudo usg fix disa_stig
 
 echo "DISA STIG host compliance steps completed."
