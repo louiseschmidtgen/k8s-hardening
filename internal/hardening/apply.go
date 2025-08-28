@@ -27,9 +27,6 @@ func ApplyFix(baseline, tailoringFile, nodeRole string) error {
 
 	// 2. Install usg and apply disa_stig if requested
 	if config.USG.Apply != nil && *config.USG.Apply {
-		if err := installUSG(); err != nil {
-			return err
-		}
 		if err := applyUSGProfile(); err != nil {
 			return err
 		}
@@ -69,28 +66,14 @@ func ApplyFix(baseline, tailoringFile, nodeRole string) error {
 	return nil
 }
 
-func installUSG() error {
-	fmt.Println("Checking if USG is installed...")
-	checkCmd := exec.Command("which", "usg")
-	if err := checkCmd.Run(); err == nil {
-		fmt.Println("USG is already installed.")
-		return nil
-	}
-
-	fmt.Println("Installing USG (Uncomplicated Security Guidelines)...")
-	installCmd := exec.Command("sudo", "apt-get", "install", "-y", "usg")
-	if err := installCmd.Run(); err != nil {
-		return err
-	}
-	return nil
-}
-
 func applyUSGProfile() error {
-	fmt.Printf("Applying USG profile: disa_stig...")
-
-	fixCmd := exec.Command("sudo", "usg", "fix", "disa_stig")
-	if err := fixCmd.Run(); err != nil {
-		return fmt.Errorf("Error applying USG profile: %v", err)
+	fmt.Println("Running USG host compliance script...")
+	scriptPath := "internal/disa-stig/02-usg.sh"
+	cmd := exec.Command("sudo", "bash", scriptPath)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("Error running USG script: %v", err)
 	}
 	return nil
 }
