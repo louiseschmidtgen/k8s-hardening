@@ -4,3 +4,14 @@ This hardening tool will reduce the manual steps required for users to achieve t
 
 ## Usage instructions
 
+Build the tool by running:
+
+```
+go build -o k8s-hardening .
+```
+
+Run the disa-stig apply command:
+
+```
+sudo ./k8s-hardening fix --baseline=disa-stig --node-role=control-plane
+```
