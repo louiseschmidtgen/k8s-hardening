@@ -31,22 +31,20 @@ fi
 
 sudo pro enable fips-updates
 
-sudo snap install k8s --channel=1.34-classic/stable --classic
-
-# TODO can we run this before reboot?
-echo "Installing core22 snap with FIPS channel..."
-# Install the FIPS core base snap
-if snap list | grep -q '^core22 '; then
-	echo "core22 is already installed. Refreshing to fips-updates/stable channel."
-	sudo snap refresh core22 --channel=fips-updates/stable
-else
-	echo "Installing core22 with FIPS-certified libraries."
-	sudo snap install core22 --channel=fips-updates/stable
-fi
-
-
 if [ -f /proc/sys/crypto/fips_enabled ] && [ "$(cat /proc/sys/crypto/fips_enabled)" -eq 1 ]; then
 	echo "FIPS is already enabled. Skipping reboot."
+
+    sudo snap install k8s --channel=1.34-classic/stable --classic
+
+    echo "Installing core22 snap with FIPS channel..."
+    # Install the FIPS core base snap
+    if snap list | grep -q '^core22 '; then
+        echo "core22 is already installed. Refreshing to fips-updates/stable channel."
+        sudo snap refresh core22 --channel=fips-updates/stable
+    else
+        echo "Installing core22 with FIPS-certified libraries."
+        sudo snap install core22 --channel=fips-updates/stable
+    fi
 else
 	echo "Rebooting to apply FIPS kernel..."
 	sudo reboot
