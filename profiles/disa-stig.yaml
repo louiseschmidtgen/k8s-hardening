@@ -1,0 +1,23 @@
+usg: 
+  apply: true
+
+ufw:
+  apply: true
+
+audit-logging:
+  apply: true
+  audit-policy-path: /var/snap/k8s/common/etc
+  audit-policy-name: audit-policy.yaml
+
+system-tuning:
+  apply: true
+  system-parameters:
+    vm.overcommit_memory: "1"
+    vm.panic_on_oom: "0"
+    kernel.panic: "10"
+    kernel.panic_on_oops: "1"
+    kernel.keys.root_maxkeys: "1000000"
+    kernel.keys.root_maxbytes: "25000000"
+
+sshd-removal:
+  apply: true
